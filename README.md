@@ -32,4 +32,5 @@ There are many options to look for if you would like to make some improvements t
 
 ## Things to remember
 This software makes no promise of guarenteed profits.  
-If you decide to use this trading bot you will be doing it at your own risk, and the creators of this bot cannot be held liable for any loss occured because of this software.
+If you decide to use this trading bot you will be doing it at your own risk, and the creators of this bot cannot be held liable for any loss occured because of this software.  
+**THIS IS FOR EDUCATIONAL PURPOSES ONLY**
