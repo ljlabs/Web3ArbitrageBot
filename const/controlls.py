@@ -1,4 +1,4 @@
-from config import network
+from const.config import network
 
 
 def getMaxCircuitDepth():
