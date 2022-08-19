@@ -1,4 +1,5 @@
 from const.config import network
+from handlers.BigIntDecimals import BigIntDecimals
 
 
 def getMaxCircuitDepth():
@@ -12,27 +13,27 @@ def getMaxCircuitDepth():
 
 def lowLiquidityBar() -> int:
     if network == "vlx":
-        return 10 * 10 ** 18
+        return BigIntDecimals(10, 0)
     elif network == "matic":
-        return 100000 * 10 ** 18
+        return BigIntDecimals(100000, 0)
     else:
         raise Exception("Unsupported network")
 
 
 def minEdgeLiquidityTxRatio() -> int:
     if network == "vlx":
-        return 0.0001
+        return BigIntDecimals(0.0001, 0)
     elif network == "matic":
-        return 0.001
+        return BigIntDecimals(0.001, 0)
     else:
         raise Exception("Unsupported network")
 
 
 def minRoiRequirement() -> int:
     if network == "vlx":
-        return 1.001
+        return BigIntDecimals(1.001, 0)
     elif network == "matic":
-        return 1.001
+        return BigIntDecimals(1.001, 0)
     else:
         raise Exception("Unsupported network")
 

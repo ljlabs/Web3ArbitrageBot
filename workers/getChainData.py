@@ -1,3 +1,4 @@
+from __future__ import annotations
 import json
 import threading
 
@@ -9,8 +10,10 @@ from handlers.threadmanager import ThreadManager
 from const.controlls import num_threads, data_file_path, data_refresh_file_path
 import math
 
+
 class ChainData:
     pairs: dict[str, list[dict[str, list[str] | list[int]]]] = []
+    token_address_to_decimal: dict[str, int] = []
 
     def getPair(self, swap: str, i: int, factory: PancakeSwapFactory):
         self.pairs[swap][i] = factory.getPair(i).asDict()
@@ -58,10 +61,19 @@ class ChainData:
             file = f.read()
             self.pairs = json.loads(file)
 
+    def getTokenAddressToDecimals(self):
+        token_address_to_decimal = {}
+        for swap in self.pairs:
+            for pair in self.pairs[swap]:
+                addresses = pair["addresses"]
+                decimals = pair["decimals"]
+                token_address_to_decimal[addresses[0]] = decimals[0]
+                token_address_to_decimal[addresses[1]] = decimals[1]
+        return token_address_to_decimal
+
     def writeDataToFile(self):
         print("writing data to file")
-        for swap in self.pairs:
-            _pairs = self.pairs[swap]
+        self.pairs["token_address_to_decimal"] = self.getTokenAddressToDecimals()
 
         with open(data_file_path, "w") as f:
             f.write(json.dumps(self.pairs))

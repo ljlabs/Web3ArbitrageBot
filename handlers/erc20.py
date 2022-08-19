@@ -1,6 +1,5 @@
 import json
 
-from factory import w3
 from const.erc20 import abi
 from factory.w3 import W3
 
@@ -35,3 +34,6 @@ class ERC20:
 
     def getBalance(self, address):
         return self.token.functions.balanceOf(address).call()
+
+    def getDecimals(self):
+        return self.token.functions.decimals().call()

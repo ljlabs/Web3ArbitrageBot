@@ -1,7 +1,11 @@
+from __future__ import annotations
+
+from decimal import Decimal
 from typing import Union
 from const.addresses import currency_address
 from const.controlls import getMaxCircuitDepth, lowLiquidityBar, sufficientNumberOfExchanges, minEdgeLiquidityTxRatio
 from factory.w3 import W3
+from handlers.BigIntDecimals import BigIntDecimals
 from handlers.erc20 import ERC20
 
 
@@ -9,6 +13,7 @@ def isLowLiquidity(pair):
     bigger_than = lowLiquidityBar()
     if pair[0] < bigger_than or pair[1] < bigger_than:
         return True
+    return False
 
 
 def isValidPair(pair):
@@ -39,18 +44,28 @@ class Graph:
     edges: dict[str, list[str] | list[int]] = {}
     maxDepth = getMaxCircuitDepth()
     swaps = []
-    tradeSize = ERC20(currency_address()["base"]).getBalance(W3().executor_wallet)
+    tradeSize = BigIntDecimals(
+        ERC20(currency_address()["base"]).getBalance(W3().executor_wallet),
+        ERC20(currency_address()["base"]).getDecimals()
+    )
     activeLPAddrs: str = []
     options = []
     chainData: dict[str, list[dict[str, list[str] | list[int]]]] = {}
+    token_address_to_decimal = {}
 
     def update_trade_size(self):
-        self.tradeSize = ERC20(currency_address()["base"]).getBalance(W3().executor_wallet)
+        base_currency = ERC20(currency_address()["base"])
+        self.tradeSize = BigIntDecimals(
+            base_currency.getBalance(W3().executor_wallet),
+            self.token_address_to_decimal[base_currency]
+        )
 
     def buildGraphFromChainData(self, data: dict[str, list[dict[str, list[str] | list[int]]]]):
         self.graph = {}
         self.edges = {}
         self.swaps = []
+        self.token_address_to_decimal = data["token_address_to_decimal"]
+        del data["token_address_to_decimal"]
         self.chainData = data
         self.activeLPAddrs = []
         for swap in data:
@@ -58,6 +73,11 @@ class Graph:
             for vert in data[swap]:
                 a = vert["addresses"][0]
                 b = vert["addresses"][1]
+                reserves = [
+                    BigIntDecimals(vert["reserves"][i], vert["decimals"][i])
+                    for i in [0, 1]
+                ]
+                vert["reserves"] = reserves
                 if isValidPair(vert["reserves"]):
                     self.activeLPAddrs.append({
                         "lp-addr": vert["address"],
@@ -73,12 +93,12 @@ class Graph:
                             self.edges[f"{a}_{b}_{swap}"] = vert["reserves"]
                     if b not in self.graph:
                         self.graph[b] = [a]
-                        reserves = [vert["reserves"][1], vert["reserves"][0], vert["reserves"][2]]
+                        reserves = [vert["reserves"][1], vert["reserves"][0]]
                         self.edges[f"{b}_{a}_{swap}"] = reserves
                     else:
                         if a not in self.graph[b]:
                             self.graph[b].append(a)
-                            reserves = [vert["reserves"][1], vert["reserves"][0], vert["reserves"][2]]
+                            reserves = [vert["reserves"][1], vert["reserves"][0]]
                             self.edges[f"{b}_{a}_{swap}"] = reserves
 
     def findMostProfitableCircuit(self):
@@ -93,8 +113,8 @@ class Graph:
     def getEdgeValue(self, at, to, at_tokens, swap) -> Union[str, int]:
         reserve = self.edges[f"{at}_{to}_{swap}"]
         con = reserve[0] * reserve[1]
-        out = reserve[0] - con / (at_tokens + reserve[1])
-        out *= 0.90                              # fees
+        out = reserve[0].value - con / (at_tokens + reserve[1])
+        out *= Decimal(0.90)                              # fees
         # if out <= 0:
         #     raise Exception(f"How is there no edge value here:  {at, to, at_tokens}")
         return f"{at}_{to}_{swap}", out

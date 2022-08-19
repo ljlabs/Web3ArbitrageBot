@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from decimal import Decimal
+
 from const.controlls import minRoiRequirement
 from factory.w3 import W3
 from handlers.erc20 import ERC20
@@ -30,7 +34,7 @@ def get_path_expected_output(graph: Graph, path: list[str]) -> list[int]:
 
 def simulate_execute_arbitrage(graph: Graph, path: list[str], optimal_amount: int) -> list[int]:
     circuit = getSwapCircuit(path, [0] * len(path))
-    expected_output_value = [min([graph.tradeSize, optimal_amount])]
+    expected_output_value = [optimal_amount]
     for i in range(len(circuit)):
         phase = circuit[i]
         swap = phase['swap']
@@ -183,8 +187,9 @@ def getEaEb(graph: Graph, pairs):
         idx += 1
     return Ea, Eb
 
+
 def getOptimalAmount(graph: Graph, pairs, ):
     Ea, Eb = getEaEb(graph, pairs)
     if Ea > Eb:
         return None
-    return int((math.sqrt(Ea*Eb*997*1000)-Ea*1000)/997)
+    return int((Decimal(math.sqrt(Ea*Eb*Decimal(997*1000)))-Ea*Decimal(1000))/Decimal(997))

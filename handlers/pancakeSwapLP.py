@@ -3,6 +3,7 @@ from typing import List, Mapping, Any
 from factory import w3
 from const.pancakeLP import abi
 from factory.w3 import W3
+from handlers.erc20 import ERC20
 
 
 class PancakeSwapLP:
@@ -17,9 +18,14 @@ class PancakeSwapLP:
     def getReserveAddresses(self) -> List[str]:
         return [self.lp.functions.token0().call(), self.lp.functions.token1().call()]
 
+    def getReserveDecimals(self, addresses) -> List[str]:
+        return [ERC20(address).getDecimals() for address in addresses]
+
     def asDict(self) -> dict[str, List[Any]]:
+        reserve_addresses = self.getReserveAddresses()
         return {
-            "addresses": self.getReserveAddresses(),
+            "addresses": reserve_addresses,
             "reserves": self.getReserves(),
+            "decimals": self.getReserveDecimals(reserve_addresses),
             "address": self.address
         }
