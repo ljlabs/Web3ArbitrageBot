@@ -3,11 +3,14 @@ import json
 from const.erc20 import abi
 from factory.w3 import W3
 
+decimals_cache = {} # decimals never change, it makes no sense not to cache
+
 
 class ERC20:
     def __init__(self, address: str):
         self.w3 = W3().getWeb3()
         self.token = self.w3.eth.contract(address=address, abi=abi)
+        self.address = address
 
     def approve(self, address, amount):
         tx = self.token.functions.approve(address, amount).buildTransaction(W3().get_tx_args())
@@ -36,4 +39,6 @@ class ERC20:
         return self.token.functions.balanceOf(address).call()
 
     def getDecimals(self):
-        return self.token.functions.decimals().call()
+        if self.address not in decimals_cache:
+            decimals_cache[self.address] = self.token.functions.decimals().call()
+        return decimals_cache[self.address]

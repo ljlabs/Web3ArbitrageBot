@@ -59,7 +59,7 @@ class Graph:
         base_currency = ERC20(currency_address()["base"])
         self.tradeSize = BigIntDecimals(
             base_currency.getBalance(W3().executor_wallet),
-            self.token_address_to_decimal[base_currency]
+            self.token_address_to_decimal[currency_address()["base"]]
         )
 
     def buildGraphFromChainData(self, data: dict[str, list[dict[str, list[str] | list[int]]]]):

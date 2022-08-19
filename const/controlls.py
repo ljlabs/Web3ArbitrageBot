@@ -22,7 +22,7 @@ def lowLiquidityBar() -> int:
 
 def maxEdgeLiquidityTxRatio() -> int:
     if network == "vlx":
-        return BigIntDecimals(0.1, 0)
+        return BigIntDecimals(0.09, 0)
     elif network == "matic":
         return BigIntDecimals(0.001, 0)
     else:

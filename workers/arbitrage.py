@@ -14,7 +14,7 @@ import math
 def should_execute(path, min_output) -> bool:
     if len(path) < 2:
         return False
-    print("Simulated roi", min_output[-1] / min_output[0], min_output[-1] / min_output[0] > 1.001)
+    print("Simulated roi from dex", min_output[-1] / min_output[0], min_output[-1] / min_output[0] > 1.001)
     if min_output[-1] / min_output[0] < minRoiRequirement():
         return False
     return True
