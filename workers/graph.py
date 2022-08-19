@@ -3,7 +3,8 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Union
 from const.addresses import currency_address
-from const.controlls import getMaxCircuitDepth, lowLiquidityBar, sufficientNumberOfExchanges, minEdgeLiquidityTxRatio
+from const.controlls import getMaxCircuitDepth, lowLiquidityBar, sufficientNumberOfExchanges, \
+    maxEdgeLiquidityTxRatio
 from factory.w3 import W3
 from handlers.BigIntDecimals import BigIntDecimals
 from handlers.erc20 import ERC20
@@ -38,6 +39,7 @@ def isFinalPath(path) -> bool:
     if not sufficientNumberOfExchanges(num_exchanges):
         return False
     return True
+
 
 class Graph:
     graph: dict[str, list[str]] = {}
@@ -113,15 +115,15 @@ class Graph:
     def getEdgeValue(self, at, to, at_tokens, swap) -> Union[str, int]:
         reserve = self.edges[f"{at}_{to}_{swap}"]
         con = reserve[0] * reserve[1]
-        out = reserve[0].value - con / (at_tokens + reserve[1])
-        out *= Decimal(0.90)                              # fees
+        out = reserve[1].value - con / (at_tokens + reserve[0])
+        out *= Decimal(0.90)  # fees
         # if out <= 0:
         #     raise Exception(f"How is there no edge value here:  {at, to, at_tokens}")
         return f"{at}_{to}_{swap}", out
 
     def stopUpdatingLowLP(self, edge):
         at, to, swap = edge.split("_")
-        #get lp address
+        # get lp address
         lp_address = ""
         for lp_data in self.chainData[swap]:
             if at in lp_data["addresses"] and to in lp_data["addresses"]:
@@ -134,10 +136,13 @@ class Graph:
 
     def isEdgeValueLiquidityIsSafe(self, edge, tokens) -> str:
         reserve = self.edges[edge]
-        isSafe = tokens / reserve[0] < minEdgeLiquidityTxRatio()
-        if not isSafe:
+        constant = reserve[0] * reserve[1]
+        output = reserve[1].value - constant / (tokens + reserve[0])
+        is_safe = output / reserve[1] < maxEdgeLiquidityTxRatio() and \
+            tokens / reserve[0] < maxEdgeLiquidityTxRatio()
+        if not is_safe:
             self.stopUpdatingLowLP(edge)
-        return isSafe
+        return is_safe
 
     def transverse(self, base, at, path, num_tokens, visited):
         if len(path) > 0 and at == path[0].split("_")[0]:
@@ -159,7 +164,8 @@ class Graph:
                             output_token_amount,
                             visited + [at]
                         )
-                        if isFinalPath(new_path) and paths_output_amount > best_output_amount and new_path not in self.options:
+                        if isFinalPath(
+                                new_path) and paths_output_amount > best_output_amount and new_path not in self.options:
                             self.options.append(new_path)
                             best_output_amount = paths_output_amount
                             best_path = new_path
