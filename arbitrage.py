@@ -4,8 +4,9 @@ from workers.arbitrage import execute_arbitrage, getOptimalAmount, should_execut
 from workers.getChainData import ChainData
 from workers.graph import Graph
 
+
 def main():
-    #init phase
+    # init phase
     cd = ChainData()
     cd.readDataFromFile()
     graph = Graph()
@@ -48,5 +49,10 @@ def main():
             print(e)
             pass
 
+
 if __name__ == '__main__':
-    main()
+    while True:
+        try:
+            main()
+        except:
+            pass
