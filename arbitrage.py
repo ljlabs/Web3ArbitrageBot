@@ -16,7 +16,7 @@ def main():
 
         # execute arbitrage trades
         operations = []
-        maxOps = 40
+        maxOps = 129
         if len(graph.options) > maxOps:
             operations = [
                 graph.options[i] for i in range(
@@ -38,7 +38,7 @@ def main():
             min_output = simulate_execute_arbitrage(graph, op, best_input_amount)
             if should_execute(op, min_output):
                 print("executing a trade")
-                execute_arbitrage(op, min_output, graph.tradeSize.rawValue)
+                execute_arbitrage(op, min_output, best_input_amount)
                 graph.update_trade_size()
                 print("=" * 10)
         try:

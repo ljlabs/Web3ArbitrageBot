@@ -31,7 +31,7 @@ def maxEdgeLiquidityTxRatio() -> int:
 
 def minRoiRequirement() -> int:
     if network == "vlx":
-        return BigIntDecimals(1.001, 0)
+        return BigIntDecimals(1.0001, 0)
     elif network == "matic":
         return BigIntDecimals(1.001, 0)
     else:
