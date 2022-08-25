@@ -1,5 +1,6 @@
 import json
 
+from const.config import trade_volume_limiter
 from const.erc20 import abi
 from factory.w3 import W3
 
@@ -36,7 +37,7 @@ class ERC20:
         return sentTx
 
     def getBalance(self, address):
-        return self.token.functions.balanceOf(address).call()
+        return int(self.token.functions.balanceOf(address).call() * trade_volume_limiter)
 
     def getDecimals(self):
         if self.address not in decimals_cache:

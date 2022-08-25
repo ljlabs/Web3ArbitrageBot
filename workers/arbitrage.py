@@ -190,6 +190,7 @@ def execute_arbitrage_single_exchange(path: list[str], min_output: list[int], op
                 int(time() + 20)
             )
             clear_last_approval()
+            return
         except Exception as e:
             if e.args[0]["message"] == 'execution reverted: WagyuRouter: INSUFFICIENT_OUTPUT_AMOUNT':
                 pass

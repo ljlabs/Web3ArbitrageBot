@@ -33,8 +33,8 @@ def main():
                 print(f"the best trade size is {best_input_amount}, graph.tradeSize = {graph.tradeSize.value}")
             if best_input_amount is None:
                 best_input_amount = graph.tradeSize.rawValue
-            if best_input_amount < graph.tradeSize.rawValue * Decimal(0.01):
-                best_input_amount = int(graph.tradeSize.rawValue * Decimal(0.1))
+            if best_input_amount < graph.tradeSize.rawValue * Decimal(0.05):
+                best_input_amount = int(graph.tradeSize.rawValue * Decimal(0.05))
             min_output = simulate_execute_arbitrage(graph, op, best_input_amount)
             if should_execute(op, min_output):
                 print("executing a trade")
