@@ -1,4 +1,6 @@
 from web3 import Web3
+
+from const.config import base_token
 from const.controlls import network
 
 bnb = {
@@ -86,10 +88,14 @@ def exchange_address():
 
 
 def currency_address():
+    currency_address = {}
     if network == "vlx":
-        return vlx["currency_address"]
+        currency_address = vlx["currency_address"]
     if network == "matic":
-        return matic["currency_address"]
+        currency_address = matic["currency_address"]
     if network == "bnb":
-        return bnb["currency_address"]
+        currency_address = bnb["currency_address"]
+    if base_token is not None:
+        currency_address["base"] = Web3.toChecksumAddress(base_token)
+    return currency_address
 

@@ -1,6 +1,5 @@
 from __future__ import annotations
 import json
-import threading
 
 from const.addresses import exchange_address
 from handlers.pancakeSwapFactory import PancakeSwapFactory
@@ -33,6 +32,9 @@ class ChainData:
                 if (math.floor((i / n) * 1000) % 10 == 0):
                     print(f"Exchange({swap}) {i/n}% complete")
                 tm.execute(target=self.getPair, args=(exchanges[swap], i, factory,))
+                if i % 1000 == 0:
+                    tm.endAll()
+                    self.writeDataToFile()
             tm.endAll()
 
     def refresh(self):
@@ -64,11 +66,13 @@ class ChainData:
     def getTokenAddressToDecimals(self):
         token_address_to_decimal = {}
         for swap in self.pairs:
-            for pair in self.pairs[swap]:
-                addresses = pair["addresses"]
-                decimals = pair["decimals"]
-                token_address_to_decimal[addresses[0]] = decimals[0]
-                token_address_to_decimal[addresses[1]] = decimals[1]
+            if swap != "token_address_to_decimal":
+                for pair in self.pairs[swap]:
+                    if pair != 0:
+                        addresses = pair["addresses"]
+                        decimals = pair["decimals"]
+                        token_address_to_decimal[addresses[0]] = decimals[0]
+                        token_address_to_decimal[addresses[1]] = decimals[1]
         return token_address_to_decimal
 
     def writeDataToFile(self):

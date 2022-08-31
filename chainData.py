@@ -14,8 +14,9 @@ def main():
         except:
             pass
         print("Time to update graph", time() - t0)
-        print("sleeping for 0.1 seconds")
-        sleep(0.1)
+        time_to_sleep = 60
+        print(f"sleeping for {time_to_sleep} seconds")
+        sleep(time_to_sleep)
 
 
 if __name__ == '__main__':

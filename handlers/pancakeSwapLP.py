@@ -4,6 +4,7 @@ from factory import w3
 from const.pancakeLP import abi
 from factory.w3 import W3
 from handlers.erc20 import ERC20
+from handlers.networkHelpers import infinite_retry
 
 
 class PancakeSwapLP:
@@ -12,9 +13,11 @@ class PancakeSwapLP:
         self.lp = self.w3.eth.contract(address=address, abi=abi)
         self.address = address
 
+    @infinite_retry(1)
     def getReserves(self) -> List[int]:
         return self.lp.functions.getReserves().call()
 
+    @infinite_retry(1)
     def getReserveAddresses(self) -> List[str]:
         return [self.lp.functions.token0().call(), self.lp.functions.token1().call()]
 

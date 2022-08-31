@@ -4,6 +4,7 @@ from factory import w3
 from const.pancakeRouter import abi
 from const.addresses import currency_address
 from factory.w3 import W3
+from handlers.networkHelpers import infinite_retry
 from handlers.pancakeSwapFactory import PancakeSwapFactory
 from handlers.pancakeSwapLP import PancakeSwapLP
 
@@ -14,6 +15,7 @@ class PancakeSwapRouter:
         self.w3 = W3().getWeb3()
         self.router = self.w3.eth.contract(address=address, abi=abi)
 
+    @infinite_retry(1)
     def get_factory(self) -> str:
         return self.router.functions.factory().call()
 
@@ -35,12 +37,14 @@ class PancakeSwapRouter:
             return True
         return False
 
+    @infinite_retry(1)
     def getPrice(self, token):
         return self.router.functions.getAmountsOut(
             int("120" + ("0" * 18)),
             [currency_address()["base"], currency_address()[token]]
         ).call()
 
+    @infinite_retry(1)
     def getPriceReverse(self, token, price):
         return self.router.functions.getAmountsOut(
             int(price),
@@ -82,5 +86,6 @@ class PancakeSwapRouter:
                 print(e)
                 raise e
 
+    @infinite_retry(1)
     def getAmountsOut(self, amountIn: int, path: list[str]) -> list[int]:
         return self.router.functions.getAmountsOut(int(amountIn), path).call()

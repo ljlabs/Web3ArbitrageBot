@@ -9,6 +9,7 @@ from factory.w3 import W3
 from handlers.BigIntDecimals import BigIntDecimals
 from handlers.erc20 import ERC20
 
+already_removed = {}
 
 def isLowLiquidity(pair):
     bigger_than = lowLiquidityBar()
@@ -61,6 +62,17 @@ class Graph:
             base_currency.getBalance(W3().executor_wallet),
             self.token_address_to_decimal[currency_address()["base"]]
         )
+    
+    def filter_bad_chain_data(self):
+        for swap in self.chainData:
+            i = 0
+            while i < len(self.chainData[swap]):
+                if self.chainData[swap][i] == 0:
+                    self.chainData[swap].pop(i)
+                else:
+                    i += 1
+
+
 
     def buildGraphFromChainData(self, data: dict[str, list[dict[str, list[str] | list[int]]]]):
         self.graph = {}
@@ -69,10 +81,11 @@ class Graph:
         self.token_address_to_decimal = data["token_address_to_decimal"]
         del data["token_address_to_decimal"]
         self.chainData = data
+        self.filter_bad_chain_data()
         self.activeLPAddrs = []
-        for swap in data:
+        for swap in self.chainData:
             self.swaps.append(swap)
-            for vert in data[swap]:
+            for vert in self.chainData[swap]:
                 a = vert["addresses"][0]
                 b = vert["addresses"][1]
                 reserves = [
@@ -122,17 +135,24 @@ class Graph:
         return f"{at}_{to}_{swap}", out
 
     def stopUpdatingLowLP(self, edge):
+        global already_removed
         at, to, swap = edge.split("_")
-        # get lp address
+        at_to = f"{at}_{to}"
         lp_address = ""
-        for lp_data in self.chainData[swap]:
-            if at in lp_data["addresses"] and to in lp_data["addresses"]:
-                lp_address = lp_data["address"]
-        # remove lp address from activeLPAddrs
-        for i in range(len(self.activeLPAddrs)):
-            if self.activeLPAddrs[i]["lp-addr"] == lp_address:
-                self.activeLPAddrs.pop(i)
-                break
+        if at_to not in already_removed:
+            # get lp address
+            for lp_data in self.chainData[swap]:
+                if at in lp_data["addresses"] and to in lp_data["addresses"]:
+                    lp_address = lp_data["address"]
+                    already_removed[at_to] = True
+                    break
+        if lp_address not in already_removed:
+            # remove lp address from activeLPAddrs
+            for i in range(len(self.activeLPAddrs)):
+                if self.activeLPAddrs[i]["lp-addr"] == lp_address:
+                    self.activeLPAddrs.pop(i)
+                    already_removed[lp_address] = True
+                    break
 
     def isEdgeValueLiquidityIsSafe(self, edge, tokens) -> str:
         reserve = self.edges[edge]
