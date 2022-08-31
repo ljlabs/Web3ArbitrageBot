@@ -11,13 +11,14 @@ This bot works by searching for all trading pairs on a given exchange, then usin
 > Due to stability issues we limit these trades to a single exchange, but we could expand to multiple exchanges in the future, greatly increasing the sea of profit that this bot can produce.
 
 ## How To Run Me:  
-1. Please begin by making the reuired changes to our config file `const/config.py` you can select a network between:
+1. Please begin by making the required changes to our [config file](https://github.com/ljlabs/Web3ArbitrageBot/blob/main/const/config.py) `const/config.py` you can select a network between:
 >- Velas, set `network = "vlx"`
 >- Polygon, set `network = "matic"`
 >- Binance, set `network = "bnb"`
 
 2. Further you will need to set the wallet private key (of the wallet you want to execute arbitrage trades with)
 3. Finaly you will need to set your wallet address (of the wallet you want to execute arbitrage trades with)
+4. Set the base_token to use the token you want to trade from and to. Please make sure that you have some balance of this token in your wallet.
 
 >I know that steps 2, and 3 are scary so please read through this applications source code to make sure that you are comfortable providing such sensitive information 
 
