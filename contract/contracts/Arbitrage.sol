@@ -110,7 +110,7 @@ contract Arbitrage is Ownable, IArbitrage {
         instruction.output,
         instruction.path, 
         address(this),
-        block.number + 5);
+        block.timestamp + 20);
     }
     emit trade_copmleted(
       instructions,
