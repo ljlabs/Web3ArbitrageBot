@@ -1,8 +1,44 @@
 from decimal import Decimal
+from handlers.arbitrageContract import ArbitrageContract
+from model.tradeInstructions import TradeInstruction
 
-from workers.arbitrage import execute_arbitrage, getOptimalAmount, should_execute, simulate_execute_arbitrage
+from workers.arbitrage import execute_arbitrage, getOptimalAmount, should_execute, should_execute_using_contract, simulate_execute_arbitrage
 from workers.getChainData import ChainData
 from workers.graph import Graph
+from const.config import arbitrage_contract_address
+
+def trade_with_contract(circuits, graph):
+    for op in circuits:
+        best_input_amount = graph.tradeSize.rawValue
+        trade_instructions = TradeInstruction.transform(op)
+        trade_instructions[0].inpt = best_input_amount
+        arb_contract = ArbitrageContract()
+        min_output = arb_contract.get_expected_output(trade_instructions)
+        if should_execute_using_contract(min_output):
+            print("executing a trade")
+            arb_contract.execute_arbitrage(trade_instructions, min_output)
+            graph.update_trade_size()
+            print("=" * 10)
+            
+
+
+def trade_without_contract(circuits, graph):
+    for op in circuits:
+        best_input_amount = getOptimalAmount(graph, op)
+        if best_input_amount is not None:
+            print(f"the best trade size is {best_input_amount}, graph.tradeSize = {graph.tradeSize.value}")
+        if best_input_amount is None:
+            best_input_amount = graph.tradeSize.rawValue
+        if best_input_amount < graph.tradeSize.rawValue * Decimal(0.05):
+            best_input_amount = int(graph.tradeSize.rawValue * Decimal(0.05))
+        min_output = simulate_execute_arbitrage(graph, op, best_input_amount)
+        if should_execute(op, min_output):
+            print("executing a trade")
+            execute_arbitrage(op, min_output, best_input_amount)
+            graph.update_trade_size()
+            print("=" * 10)
+
+
 
 
 def main():
@@ -15,32 +51,24 @@ def main():
         graph.findMostProfitableCircuit()
 
         # execute arbitrage trades
-        operations = []
-        maxOps = 129
-        if len(graph.options) > maxOps:
-            operations = [
-                graph.options[i] for i in range(
-                    len(graph.options) - 1,
-                    len(graph.options) - (maxOps + 1),
-                    -1
-                )
-            ]
+        circuits = []
+        # maxOps = 129
+        # if len(graph.options) > maxOps:
+        #     circuits = [
+        #         graph.options[i] for i in range(
+        #             len(graph.options) - 1,
+        #             len(graph.options) - (maxOps + 1),
+        #             -1
+        #         )
+        #     ]
+        # else:
+        circuits = graph.options
+        # this is to switch between simplistic and complex trading conditions
+        if arbitrage_contract_address is None:
+            trade_without_contract(circuits, graph)
         else:
-            operations = graph.options
-        for op in operations:
-            best_input_amount = getOptimalAmount(graph, op)
-            if best_input_amount is not None:
-                print(f"the best trade size is {best_input_amount}, graph.tradeSize = {graph.tradeSize.value}")
-            if best_input_amount is None:
-                best_input_amount = graph.tradeSize.rawValue
-            if best_input_amount < graph.tradeSize.rawValue * Decimal(0.05):
-                best_input_amount = int(graph.tradeSize.rawValue * Decimal(0.05))
-            min_output = simulate_execute_arbitrage(graph, op, best_input_amount)
-            if should_execute(op, min_output):
-                print("executing a trade")
-                execute_arbitrage(op, min_output, best_input_amount)
-                graph.update_trade_size()
-                print("=" * 10)
+            trade_with_contract(circuits, graph)
+
         try:
             print("writing update data to file")
             cd.write_refresh_data(graph.activeLPAddrs)

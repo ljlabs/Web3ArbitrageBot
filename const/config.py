@@ -6,3 +6,5 @@ trade_volume_limiter = 1
 # I would suggest a stable coin
 # Set to None to use default value in the const/addresses currency_address dictionary
 base_token = "{THE TOKEN YOU WANT TO TRADE}"
+base_token = None
+arbitrage_contract_address = None

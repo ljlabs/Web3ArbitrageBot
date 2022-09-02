@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 from decimal import Decimal
+from turtle import update
 from typing import Union
 from const.addresses import currency_address
 from const.controlls import getMaxCircuitDepth, lowLiquidityBar, sufficientNumberOfExchanges, \
     maxEdgeLiquidityTxRatio
 from factory.w3 import W3
 from handlers.BigIntDecimals import BigIntDecimals
+from handlers.arbitrageContract import ArbitrageContract
 from handlers.erc20 import ERC20
+from const.config import arbitrage_contract_address
 
 already_removed = {}
+
 
 def isLowLiquidity(pair):
     bigger_than = lowLiquidityBar()
@@ -47,22 +51,39 @@ class Graph:
     edges: dict[str, list[str] | list[int]] = {}
     maxDepth = getMaxCircuitDepth()
     swaps = []
-    tradeSize = BigIntDecimals(
-        ERC20(currency_address()["base"]).getBalance(W3().executor_wallet),
-        ERC20(currency_address()["base"]).getDecimals()
-    )
+    tradeSize = None
     activeLPAddrs: str = []
     options = []
     chainData: dict[str, list[dict[str, list[str] | list[int]]]] = {}
     token_address_to_decimal = {}
 
+    def __init__(self) -> None:
+        if arbitrage_contract_address is not None:
+            self.tradeSize = BigIntDecimals(
+                ERC20(currency_address()["base"]).getBalance(
+                    arbitrage_contract_address),
+                ERC20(currency_address()["base"]).getDecimals()
+            )
+        else:
+            self.tradeSize = BigIntDecimals(
+                ERC20(currency_address()["base"]).getBalance(
+                    W3().executor_wallet),
+                ERC20(currency_address()["base"]).getDecimals()
+            )
+
     def update_trade_size(self):
         base_currency = ERC20(currency_address()["base"])
-        self.tradeSize = BigIntDecimals(
-            base_currency.getBalance(W3().executor_wallet),
-            self.token_address_to_decimal[currency_address()["base"]]
-        )
-    
+        if arbitrage_contract_address is not None:
+            self.tradeSize = BigIntDecimals(
+                base_currency.getBalance(arbitrage_contract_address),
+                self.token_address_to_decimal[currency_address()["base"]]
+            )
+        else:
+            self.tradeSize = BigIntDecimals(
+                base_currency.getBalance(W3().executor_wallet),
+                self.token_address_to_decimal[currency_address()["base"]]
+            )
+
     def filter_bad_chain_data(self):
         for swap in self.chainData:
             i = 0
@@ -71,8 +92,6 @@ class Graph:
                     self.chainData[swap].pop(i)
                 else:
                     i += 1
-
-
 
     def buildGraphFromChainData(self, data: dict[str, list[dict[str, list[str] | list[int]]]]):
         self.graph = {}
@@ -113,7 +132,8 @@ class Graph:
                     else:
                         if a not in self.graph[b]:
                             self.graph[b].append(a)
-                            reserves = [vert["reserves"][1], vert["reserves"][0]]
+                            reserves = [vert["reserves"]
+                                        [1], vert["reserves"][0]]
                             self.edges[f"{b}_{a}_{swap}"] = reserves
 
     def findMostProfitableCircuit(self):
@@ -129,7 +149,7 @@ class Graph:
         reserve = self.edges[f"{at}_{to}_{swap}"]
         con = reserve[0] * reserve[1]
         out = reserve[1].value - con / (at_tokens + reserve[0])
-        out *= Decimal(0.90)  # fees
+        out *= Decimal(0.80)  # fees
         # if out <= 0:
         #     raise Exception(f"How is there no edge value here:  {at, to, at_tokens}")
         return f"{at}_{to}_{swap}", out
@@ -175,7 +195,8 @@ class Graph:
         for swap in self.swaps:
             for neighbour in self.graph[at]:
                 if (neighbour == base or neighbour not in visited) and self.isValidSwap(at, neighbour, swap):
-                    next_path_step, output_token_amount = self.getEdgeValue(at, neighbour, num_tokens, swap)
+                    next_path_step, output_token_amount = self.getEdgeValue(
+                        at, neighbour, num_tokens, swap)
                     if output_token_amount > 0 and self.isEdgeValueLiquidityIsSafe(next_path_step, num_tokens):
                         new_path, paths_output_amount = self.transverse(
                             base,

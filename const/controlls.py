@@ -13,7 +13,7 @@ def getMaxCircuitDepth():
 
 def lowLiquidityBar() -> int:
     if network == "vlx":
-        return BigIntDecimals(10, 0)
+        return BigIntDecimals(10000, 0)
     elif network == "matic":
         return BigIntDecimals(10000, 0)
     else:
@@ -44,7 +44,7 @@ def minRoiRequirement() -> int:
 #   n: is the number of excahnges in a circuit
 def sufficientNumberOfExchanges(n: int) -> bool:
     if network == "vlx":
-        if n == 1:
+        if n >= 1 and n <= 3:
             return True
     elif network == "matic":
         if n == 1:

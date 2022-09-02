@@ -130,3 +130,5 @@ dmypy.json
 *.json
 *.backup
 /.idea/
+contract/node_modules/
+contract/.secret
