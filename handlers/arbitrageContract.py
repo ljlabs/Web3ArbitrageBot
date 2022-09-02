@@ -36,7 +36,7 @@ class ArbitrageContract:
     def execute_arbitrage(self, instructions, min_output):
         for i in range(len(instructions)):
             instructions[i].inpt = min_output[i][0]
-            instructions[i].output = min_output[i][-1]
+            instructions[i].outpt = min_output[i][-1]
         
         tx = self.arbitrage_contract.functions.execute_trade(
             [instruction.params() for instruction in instructions]

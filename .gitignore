@@ -132,3 +132,4 @@ dmypy.json
 /.idea/
 contract/node_modules/
 contract/.secret
+const/config.py
