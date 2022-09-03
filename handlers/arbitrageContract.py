@@ -38,15 +38,27 @@ class ArbitrageContract:
             instructions[i].inpt = min_output[i][0]
             instructions[i].outpt = min_output[i][-1]
         
-        tx = self.arbitrage_contract.functions.execute_trade(
+        tx_raw = self.arbitrage_contract.functions.execute_trade(
             [instruction.params() for instruction in instructions]
-            ).buildTransaction(W3().get_tx_args())
+            )
+        tx = tx_raw.buildTransaction(W3().get_tx_args())
         print(tx)
         signed_txn = self.w3.eth.account.sign_transaction(tx, private_key=W3().get_private_key())
         try:
             sentTx = self.w3.eth.send_raw_transaction(signed_txn.rawTransaction)
             self.w3.eth.wait_for_transaction_receipt(sentTx)
-            return self.w3.eth.get_transaction_receipt(sentTx)
+        except ValueError as e:
+            if e.args[0]['code'] == 1002:
+                print("Nonce Error Increasing Nonce By 1")
+                tx_args = W3().get_tx_args()
+                tx_args['nonce'] = W3().velasW3.eth.getTransactionCount(W3().executor_wallet) + 1
+                tx = tx_raw.buildTransaction(tx_args)
+                signed_txn = self.w3.eth.account.sign_transaction(tx, private_key=W3().get_private_key())
+                sentTx = self.w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+                self.w3.eth.wait_for_transaction_receipt(sentTx)
+            else:
+                print(e)
+                raise e
         except Exception as e:
             print(e)
         

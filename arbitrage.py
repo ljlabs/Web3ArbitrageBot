@@ -1,5 +1,6 @@
 from decimal import Decimal
 from handlers.arbitrageContract import ArbitrageContract
+from handlers.threadmanager import ThreadManager
 from model.tradeInstructions import TradeInstruction
 
 from workers.arbitrage import execute_arbitrage, getOptimalAmount, should_execute, should_execute_using_contract, simulate_execute_arbitrage
@@ -7,18 +8,26 @@ from workers.getChainData import ChainData
 from workers.graph import Graph
 from const.config import arbitrage_contract_address
 
-def trade_with_contract(circuits, graph):
-    for op in circuits:
-        best_input_amount = graph.tradeSize.rawValue
-        trade_instructions = TradeInstruction.transform(op)
-        trade_instructions[0].inpt = best_input_amount
-        arb_contract = ArbitrageContract()
+def trade_with_contract_threadeable(op, graph):
+    best_input_amount = graph.tradeSize.rawValue
+    trade_instructions = TradeInstruction.transform(op)
+    trade_instructions[0].inpt = best_input_amount
+    arb_contract = ArbitrageContract()
+    min_output = arb_contract.get_expected_output(trade_instructions)
+    while should_execute_using_contract(min_output):
+        print("executing a trade")
+        arb_contract.execute_arbitrage(trade_instructions, min_output)
+        graph.update_trade_size()
+        print("=" * 10)
         min_output = arb_contract.get_expected_output(trade_instructions)
-        if should_execute_using_contract(min_output):
-            print("executing a trade")
-            arb_contract.execute_arbitrage(trade_instructions, min_output)
-            graph.update_trade_size()
-            print("=" * 10)
+
+
+def trade_with_contract(circuits, graph):
+    num_threads = 20
+    tm = ThreadManager(num_threads)
+    for op in circuits:
+        tm.execute(target=trade_with_contract_threadeable, args=(op, graph,))
+    tm.endAll()
             
 
 
