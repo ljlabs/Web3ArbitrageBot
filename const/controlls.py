@@ -4,7 +4,7 @@ from handlers.BigIntDecimals import BigIntDecimals
 
 def getMaxCircuitDepth():
     if network == "vlx":
-        return 10
+        return 5
     elif network == "matic":
         return 5
     else:
@@ -47,7 +47,7 @@ def sufficientNumberOfExchanges(n: int) -> bool:
         if n >= 1 and n <= 3:
             return True
     elif network == "matic":
-        if n == 1:
+        if n >= 1 and n <= 3:
             return True
     else:
         raise Exception("Unsupported network")
