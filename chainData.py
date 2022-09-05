@@ -3,9 +3,9 @@ from time import sleep, time
 
 def main():
     cd = ChainData()
-    cd.readDataFromFile()
-    # cd.getDataFromChain()
-    # cd.writeDataToFile()
+    # cd.readDataFromFile()
+    cd.getDataFromChain()
+    cd.writeDataToFile()
     while True:
         t0 = time()
         try:
