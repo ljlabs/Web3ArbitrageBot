@@ -60,13 +60,14 @@ module.exports = {
             networkCheckTimeout: 10000
         },
         prod: {
-            provider: () => new HDWalletProvider(privateKey, `https://evmexplorer.velas.com/rpc`),
-            network_id: 106, // Velas Network Id
+            provider: () => new HDWalletProvider(privateKey, `https://polygon-rpc.com/`),
+            network_id: 137, // Polygon Network Id
             confirmations: 10,
             timeoutBlocks: 200,
             skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
-            from: '0xB7569039cd9b6Ee73cE9117adC66e92dc5d33de7',
-            networkCheckTimeout: 10000
+            from: '0x3eD58d30250b06dEe2Ff676158b3E2Ae0798959a',
+            networkCheckTimeout: 10000,
+            gasPrice: 38000000000, // 20 gwei (in wei) (default: 100 gwei)
         },
         // Useful for testing. The `development` name is special - truffle uses it by default
         // if it's defined here and no other network is specified at the command line.

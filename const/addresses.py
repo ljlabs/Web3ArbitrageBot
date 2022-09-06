@@ -70,16 +70,14 @@ vlx = {
 matic = {
     "exchange_address": {
         "tetuSwap": Web3.toChecksumAddress("0xBCA055F25c3670fE0b1463e8d470585Fe15Ca819"),
-        "firebirdSwap": Web3.toChecksumAddress("0xF6fa9Ea1f64f1BBfA8d71f7f43fAF6D45520bfac"),
         "polycatSwap": Web3.toChecksumAddress("0x94930a328162957FF1dd48900aF67B5439336cBD"),
         "gravitySwap": Web3.toChecksumAddress("0x57dE98135e8287F163c59cA4fF45f1341b680248"),
         "elkSwap": Web3.toChecksumAddress("0xf38a7A7Ac2D745E2204c13F824c00139DF831FFf"),
         "jetSwap": Web3.toChecksumAddress("0x5C6EC38fb0e2609672BDf628B1fD605A523E5923"),
-        "Dystopia": Web3.toChecksumAddress("0xbE75Dd16D029c6B32B7aD57A0FD9C1c20Dd2862e"),
         "DFYN": Web3.toChecksumAddress("0xA102072A4C07F06EC3B4900FDC4C7B80b6c57429"),
         "apeswap": Web3.toChecksumAddress("0xC0788A3aD43d79aa53B09c2EaCc313A787d1d607"),
-        "meerkatSwap": Web3.toChecksumAddress("0x51aba405de2b25e5506dea32a6697f450ceb1a17"),
-        "sushiswap": Web3.toChecksumAddress("0x1b02da8cb0d097eb8d57a175b88c7d8b47997506"),
+        # "meerkatSwap": Web3.toChecksumAddress("0x51aba405de2b25e5506dea32a6697f450ceb1a17"),
+        # "sushiswap": Web3.toChecksumAddress("0x1b02da8cb0d097eb8d57a175b88c7d8b47997506"),
         "quickswap": Web3.toChecksumAddress("0xa5e0829caced8ffdd4de3c43696c57f7d7a678ff"),
     },
     "currency_address": {

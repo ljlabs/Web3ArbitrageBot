@@ -14,22 +14,23 @@ from const.config import arbitrage_contract_address
 
 already_removed = {}
 
+# # this is done earlier now
+# def isLowLiquidity(pair):
+#     bigger_than = lowLiquidityBar()
+#     if pair[0] < bigger_than or pair[1] < bigger_than:
+#         return True
+#     return False
 
-def isLowLiquidity(pair):
-    bigger_than = lowLiquidityBar()
-    if pair[0] < bigger_than or pair[1] < bigger_than:
-        return True
-    return False
 
-
+# need new filters
 def isValidPair(pair):
-    if isLowLiquidity(pair):
-        return False
+    # if isLowLiquidity(pair):
+    #     return False
     return True
 
 
 def isFinalPath(path) -> bool:
-    if len(path) < 2:
+    if len(path) <= 2:
         return False
     start = path[0].split("_")[0]
     end = path[-1].split("_")[1]
@@ -88,9 +89,21 @@ class Graph:
         for swap in self.chainData:
             i = 0
             while i < len(self.chainData[swap]):
+                was_popped = False
                 if self.chainData[swap][i] == 0:
                     self.chainData[swap].pop(i)
-                else:
+                    was_popped = True
+                if not was_popped:
+                    a = BigIntDecimals(self.chainData[swap][i]["reserves"][0],
+                                       self.chainData[swap][i]["decimals"][0]
+                                       )
+                    b = BigIntDecimals(self.chainData[swap][i]["reserves"][1],
+                                       self.chainData[swap][i]["decimals"][1]
+                                       )
+                    if a < lowLiquidityBar() or b < lowLiquidityBar():
+                        self.chainData[swap].pop(i)
+                        was_popped = True
+                if not was_popped:
                     i += 1
 
     def buildGraphFromChainData(self, data: dict[str, list[dict[str, list[str] | list[int]]]]):
@@ -185,7 +198,7 @@ class Graph:
         return is_safe
 
     def transverse(self, base, at, path, num_tokens, visited):
-        if len(path) > 0 and at == path[0].split("_")[0]:
+        if len(path) > 0 and at == base:
             return path, num_tokens
         if len(path) == self.maxDepth:
             return path, num_tokens
@@ -193,7 +206,7 @@ class Graph:
         best_output_amount = 0
         best_path = []
         for swap in self.swaps:
-            for neighbour in self.graph[at]:
+            for neighbour in self.graph.get(at, []):
                 if (neighbour == base or neighbour not in visited) and self.isValidSwap(at, neighbour, swap):
                     next_path_step, output_token_amount = self.getEdgeValue(
                         at, neighbour, num_tokens, swap)

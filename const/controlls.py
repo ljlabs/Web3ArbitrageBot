@@ -6,7 +6,7 @@ def getMaxCircuitDepth():
     if network == "vlx":
         return 5
     elif network == "matic":
-        return 5
+        return 10
     else:
         raise Exception("Unsupported network")
 
@@ -15,7 +15,7 @@ def lowLiquidityBar() -> int:
     if network == "vlx":
         return BigIntDecimals(10000, 0)
     elif network == "matic":
-        return BigIntDecimals(10000, 0)
+        return BigIntDecimals(20000, 0)
     else:
         raise Exception("Unsupported network")
 
@@ -24,7 +24,7 @@ def maxEdgeLiquidityTxRatio() -> int:
     if network == "vlx":
         return BigIntDecimals(0.09, 0)
     elif network == "matic":
-        return BigIntDecimals(0.09, 0)
+        return BigIntDecimals(0.01, 0)
     else:
         raise Exception("Unsupported network")
 
@@ -47,7 +47,7 @@ def sufficientNumberOfExchanges(n: int) -> bool:
         if n >= 1 and n <= 3:
             return True
     elif network == "matic":
-        if n >= 1 and n <= 3:
+        if n >= 1 and n <= 5:
             return True
     else:
         raise Exception("Unsupported network")

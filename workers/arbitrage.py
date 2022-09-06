@@ -23,9 +23,10 @@ def clear_last_approval():
 
 
 def should_execute_using_contract(min_output) -> bool:
+    print("Simulated roi from dex", min_output[-1][-1] / min_output[0][0], min_output[-1][-1] / min_output[0][0] > minRoiRequirement())
+
     if len(min_output) < 2:
         return False
-    print("Simulated roi from dex", min_output[-1][-1] / min_output[0][0], min_output[-1][-1] / min_output[0][0] > minRoiRequirement())
     if min_output[-1][-1] / min_output[0][0] < minRoiRequirement(): # these are the same token so the number of decimals is irrelevant
         return False
     return True

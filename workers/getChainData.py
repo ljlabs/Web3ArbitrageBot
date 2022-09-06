@@ -20,22 +20,26 @@ class ChainData:
 
     def getDataFromChain(self) -> list[dict[str, list[str] | list[int]]]:
         print("reading data from chain")
-        self.pairs = {}
         exchanges = exchange_address()
         tm = ThreadManager(num_threads)
         for swap in exchanges:
+            known_pairs = len(self.pairs.get(exchanges[swap], []))
+            print(swap, "known pairs:", known_pairs)
             router = PancakeSwapRouter(exchanges[swap])
             factory = PancakeSwapFactory(router.get_factory())
             n = factory.getNumberOfPairs()
+            print("found pairs:", n)
             self.pairs[exchanges[swap]] = [0] * n
-            for i in range(n):
-                if (math.floor((i / n) * 1000) % 10 == 0):
-                    print(f"Exchange({swap}) {i/n}% complete")
-                tm.execute(target=self.getPair, args=(exchanges[swap], i, factory,))
-                if i % 1000 == 0:
-                    tm.endAll()
-                    self.writeDataToFile()
-            tm.endAll()
+            # skips existing pairs on initial run
+            if n > known_pairs:
+                for i in range(known_pairs, n):
+                    if (math.floor((i / n) * 1000) % 10 == 0):
+                        print(f"Exchange({swap}) {(i/n)*100}% complete")
+                    tm.execute(target=self.getPair, args=(exchanges[swap], i, factory,))
+                    # if i % 1000 == 0:
+                    #     tm.endAll()
+                    #     self.writeDataToFile()
+                tm.endAll()
 
     def refresh(self):
         lp_addresses = {}

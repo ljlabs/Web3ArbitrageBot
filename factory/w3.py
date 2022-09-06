@@ -72,7 +72,7 @@ class W3:
         return {
             'chainId': self.get_chain_id(),
             'gas': 3000000,
-            'gasPrice': self.getWeb3().toWei('5', 'gwei'),
+            'gasPrice': self.getWeb3().toWei('35', 'gwei'),
             'nonce': nonce
         }
 
