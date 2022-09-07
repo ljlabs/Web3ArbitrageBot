@@ -150,6 +150,7 @@ class Graph:
                             self.edges[f"{b}_{a}_{swap}"] = reserves
 
     def findMostProfitableCircuit(self):
+        print("Finding Paths")
         base = currency_address()["base"]
         self.options = []
         resp = self.transverse(base, base, [], self.tradeSize, [])

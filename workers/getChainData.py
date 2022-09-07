@@ -1,4 +1,5 @@
 from __future__ import annotations
+from http.client import FOUND
 import json
 
 from const.addresses import exchange_address
@@ -29,10 +30,15 @@ class ChainData:
             factory = PancakeSwapFactory(router.get_factory())
             n = factory.getNumberOfPairs()
             print("found pairs:", n)
-            self.pairs[exchanges[swap]] = [0] * n
+            if exchanges[swap] not in self.pairs:
+                if known_pairs > 0:
+                    print("ignoring found pairs")
+                known_pairs = 0
+                self.pairs[exchanges[swap]] = []
             # skips existing pairs on initial run
             if n > known_pairs:
                 for i in range(known_pairs, n):
+                    self.pairs[exchanges[swap]].append(0)
                     if (math.floor((i / n) * 1000) % 10 == 0):
                         print(f"Exchange({swap}) {(i/n)*100}% complete")
                     tm.execute(target=self.getPair, args=(exchanges[swap], i, factory,))
@@ -63,7 +69,7 @@ class ChainData:
 
     def readDataFromFile(self):
         print("reading data from file")
-        with open(data_file_path, "r") as f:
+        with open(data_file_path, "r+") as f:
             file = f.read()
             self.pairs = json.loads(file)
 

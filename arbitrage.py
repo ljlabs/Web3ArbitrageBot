@@ -23,7 +23,7 @@ def trade_with_contract_threadeable(op, graph):
 
 
 def trade_with_contract(circuits, graph):
-    num_threads = 20
+    num_threads = 5
     tm = ThreadManager(num_threads)
     for op in circuits:
         tm.execute(target=trade_with_contract_threadeable, args=(op, graph,))
@@ -72,6 +72,7 @@ def main():
         #     ]
         # else:
         circuits = graph.options
+        print(f"Found {len(circuits)} paths")
         # this is to switch between simplistic and complex trading conditions
         if arbitrage_contract_address is None:
             trade_without_contract(circuits, graph)

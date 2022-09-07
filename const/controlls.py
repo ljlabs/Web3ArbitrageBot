@@ -15,7 +15,7 @@ def lowLiquidityBar() -> int:
     if network == "vlx":
         return BigIntDecimals(10000, 0)
     elif network == "matic":
-        return BigIntDecimals(20000, 0)
+        return BigIntDecimals(2000, 0)
     else:
         raise Exception("Unsupported network")
 
@@ -55,6 +55,6 @@ def sufficientNumberOfExchanges(n: int) -> bool:
 
 
 # operational
-num_threads = 1
+num_threads = 5
 data_file_path = f"data.{network}.json"
 data_refresh_file_path = f"data.refresh.{network}.json"
