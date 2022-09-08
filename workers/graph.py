@@ -3,7 +3,7 @@ from __future__ import annotations
 from decimal import Decimal
 from turtle import update
 from typing import Union
-from const.addresses import currency_address
+from const.addresses import approved_addresses, currency_address, filter_addresses
 from const.controlls import getMaxCircuitDepth, lowLiquidityBar, sufficientNumberOfExchanges, \
     maxEdgeLiquidityTxRatio
 from factory.w3 import W3
@@ -104,9 +104,29 @@ class Graph:
                         self.chainData[swap].pop(i)
                         was_popped = True
                 if not was_popped:
+                    a = self.chainData[swap][i]["addresses"][0]
+                    b = self.chainData[swap][i]["addresses"][1]
+                    if a in filter_addresses() or b in filter_addresses():
+                        self.chainData[swap].pop(i)
+                        was_popped = True
+                if not was_popped:
                     i += 1
 
-    def buildGraphFromChainData(self, data: dict[str, list[dict[str, list[str] | list[int]]]]):
+    def filter_approved_list_only(self):
+        for swap in self.chainData:
+            i = 0
+            while i < len(self.chainData[swap]):
+                was_popped = False
+                if not was_popped:
+                    a = self.chainData[swap][i]["addresses"][0]
+                    b = self.chainData[swap][i]["addresses"][1]
+                    if a not in approved_addresses() or b not in approved_addresses():
+                        self.chainData[swap].pop(i)
+                        was_popped = True
+                if not was_popped:
+                    i += 1
+
+    def buildGraphFromChainData(self, data: dict[str, list[dict[str, list[str] | list[int]]]], approved_list_only: bool):
         self.graph = {}
         self.edges = {}
         self.swaps = []
@@ -114,6 +134,8 @@ class Graph:
         del data["token_address_to_decimal"]
         self.chainData = data
         self.filter_bad_chain_data()
+        if approved_list_only:
+            self.filter_approved_list_only()
         self.activeLPAddrs = []
         for swap in self.chainData:
             self.swaps.append(swap)

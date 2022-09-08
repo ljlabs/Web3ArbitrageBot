@@ -3,6 +3,44 @@ from web3 import Web3
 from const.config import base_token
 from const.controlls import network
 
+
+
+def exchange_address():
+    if network == "vlx":
+        return vlx["exchange_address"]
+    if network == "matic":
+        return matic["exchange_address"]
+    if network == "bnb":
+        return bnb["exchange_address"]
+
+def currency_address():
+    currency_address = {}
+    if network == "vlx":
+        currency_address = vlx["currency_address"]
+    if network == "matic":
+        currency_address = matic["currency_address"]
+    if network == "bnb":
+        currency_address = bnb["currency_address"]
+    if base_token is not None:
+        currency_address["base"] = Web3.toChecksumAddress(base_token)
+    return currency_address
+
+def filter_addresses():
+    if network == "vlx":
+        return vlx["filter_addresses"]
+    if network == "matic":
+        return matic["filter_addresses"]
+    if network == "bnb":
+        return bnb["filter_addresses"]
+
+def approved_addresses():
+    if network == "vlx":
+        return vlx["approved_addresses"]
+    if network == "matic":
+        return matic["approved_addresses"]
+    if network == "bnb":
+        return bnb["approved_addresses"]
+
 bnb = {
     "exchange_address": {
         "pancakeswap": Web3.toChecksumAddress("0x10ED43C718714eb63d5aA57B78B54704E256024E"),
@@ -40,7 +78,9 @@ bnb = {
         "usdt": Web3.toChecksumAddress("0x55d398326f99059ff775485246999027b3197955"),
         "usdc": Web3.toChecksumAddress("0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d"),
         "bpad": Web3.toChecksumAddress("0x29132062319aa375e764ef8ef756f2b28c77a9c9")
-    }
+    },
+    "filter_addresses": [],
+    "approved_addresses": []
 }
 # The exchange_address are the addresses of the UniSwapV02 router
 vlx = {
@@ -64,7 +104,16 @@ vlx = {
         "BMF": Web3.toChecksumAddress("0x54c159b71262878bf096b45a3c6a8fd0a3250b10"),
         "bambooDefi": Web3.toChecksumAddress("0x300a8be53b4b5557f48620d578e7461e3b927dd0"),
         "swapz": Web3.toChecksumAddress("0x9b6fbf0ea23faf0d77b94d5699b44062e5e747ac")
-    }
+    },
+    "filter_addresses": [],
+    "approved_addresses": [
+        "0xaBf26902Fd7B624e0db40D31171eA9ddDf078351", # WAG
+        "0xc579D1f3CF86749E05CD06f7ADe17856c2CE3126", # WVLX
+        "0xc111c29A988AE0C0087D97b33C6E6766808A3BD3", # BUSD
+        "0x72eB7CA07399Ec402c5b7aa6A65752B6A1Dc0C27", # ASTRO
+        "0xcD7509b76281223f5B7d3aD5d47F8D7Aa5C2B9bf", # USDV
+        "0xd12f7A98C0d740E7Ec82E8caF94EB79C56D1B623", # VDGT
+    ]
 }
 
 matic = {
@@ -82,28 +131,11 @@ matic = {
     },
     "currency_address": {
         "base": Web3.toChecksumAddress("0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270")
-    }
+    },
+    "filter_addresses": [
+        "0x61dAECaB65EE2A1D5b6032df030f3fAA3d116Aa7",
+        "0x831753DD7087CaC61aB5644b308642cc1c33Dc13",
+
+    ],
+    "approved_addresses": []
 }
-
-
-def exchange_address():
-    if network == "vlx":
-        return vlx["exchange_address"]
-    if network == "matic":
-        return matic["exchange_address"]
-    if network == "bnb":
-        return bnb["exchange_address"]
-
-
-def currency_address():
-    currency_address = {}
-    if network == "vlx":
-        currency_address = vlx["currency_address"]
-    if network == "matic":
-        currency_address = matic["currency_address"]
-    if network == "bnb":
-        currency_address = bnb["currency_address"]
-    if base_token is not None:
-        currency_address["base"] = Web3.toChecksumAddress(base_token)
-    return currency_address
-

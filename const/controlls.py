@@ -15,7 +15,7 @@ def lowLiquidityBar() -> int:
     if network == "vlx":
         return BigIntDecimals(10000, 0)
     elif network == "matic":
-        return BigIntDecimals(2000, 0)
+        return BigIntDecimals(40000, 0)
     else:
         raise Exception("Unsupported network")
 

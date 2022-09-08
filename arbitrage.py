@@ -7,6 +7,7 @@ from workers.arbitrage import execute_arbitrage, getOptimalAmount, should_execut
 from workers.getChainData import ChainData
 from workers.graph import Graph
 from const.config import arbitrage_contract_address
+import sys
 
 def trade_with_contract_threadeable(op, graph):
     best_input_amount = graph.tradeSize.rawValue
@@ -53,10 +54,13 @@ def trade_without_contract(circuits, graph):
 def main():
     # init phase
     cd = ChainData()
-    cd.readDataFromFile()
     graph = Graph()
+    cd.readDataFromFile()
+    approved_list_only = False
+    if "-f" in sys.argv or "-fastPaths" in sys.argv:
+        approved_list_only = True
     while True:
-        graph.buildGraphFromChainData(cd.pairs)
+        graph.buildGraphFromChainData(cd.pairs, approved_list_only)
         graph.findMostProfitableCircuit()
 
         # execute arbitrage trades
@@ -89,8 +93,18 @@ def main():
 
 
 if __name__ == '__main__':
-    while True:
-        try:
-            main()
-        except:
-            pass
+
+    if "-h" in sys.argv or "-help" in sys.argv:
+        print ("""
+This is the help menu of the arbitrage bot:
+    -h or -help prints this help menu
+    -f or -fastPaths filters the universe of possible arbitrage paths to only thos approved in the adresses.py file         
+
+**If no params are supplied the bot will operate as usual**
+""")
+    else:
+        while True:
+            try:
+                main()
+            except:
+                pass
