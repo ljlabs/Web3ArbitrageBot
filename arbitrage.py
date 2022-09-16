@@ -11,13 +11,14 @@ import sys
 
 def trade_with_contract_threadeable(op, graph):
     best_input_amount = graph.tradeSize.rawValue
-    trade_instructions = TradeInstruction.transform(op)
+    trade_instructions: list[TradeInstruction] = TradeInstruction.transform(op)
     trade_instructions[0].inpt = best_input_amount
     arb_contract = ArbitrageContract()
     min_output = arb_contract.get_expected_output(trade_instructions)
     while should_execute_using_contract(min_output):
+        trade_instructions = TradeInstruction.set_price(trade_instructions, min_output)
         print("executing a trade")
-        arb_contract.execute_arbitrage(trade_instructions, min_output)
+        arb_contract.execute_arbitrage(trade_instructions)
         graph.update_trade_size()
         print("=" * 10)
         min_output = arb_contract.get_expected_output(trade_instructions)

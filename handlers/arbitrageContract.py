@@ -1,4 +1,5 @@
 from typing import List, Mapping, Any
+from const.controlls import minRoiRequirement
 
 from factory import w3
 from const.arbitrageContract import arbitrage_contract_abi
@@ -6,6 +7,7 @@ from factory.w3 import W3
 from handlers.erc20 import ERC20
 from handlers.networkHelpers import infinite_retry
 from const.config import arbitrage_contract_address, wallet_address
+from model.tradeInstructions import TradeInstruction
 
 
 class ArbitrageContract:
@@ -33,11 +35,20 @@ class ArbitrageContract:
             [instruction.params() for instruction in instructions]
             ).call({'from': wallet_address})
 
-    def execute_arbitrage(self, instructions, min_output):
-        for i in range(len(instructions)):
-            instructions[i].inpt = min_output[i][0]
-            instructions[i].outpt = min_output[i][-1]
-        
+    def shrink_expected_output(self, instructions: list[TradeInstruction], shrink_factor: int) -> list[TradeInstruction]:
+        for i, x in range(len(instructions)):
+            if i != 0:
+                instructions[i].inpt = int(instructions[i].inpt * shrink_factor)
+            instructions[i].outpt = int(instructions[i].outpt * shrink_factor)
+        return instructions
+
+    def instructions_are_valid(self, instructions: list[TradeInstruction]) -> bool:
+        if instructions[-1].outpt / instructions[0].inpt < minRoiRequirement():
+            return False
+        return True
+
+
+    def execute_arbitrage(self, instructions: list[TradeInstruction], count=0):        
         tx_raw = self.arbitrage_contract.functions.execute_trade(
             [instruction.params() for instruction in instructions]
             )
@@ -58,7 +69,9 @@ class ArbitrageContract:
                 self.w3.eth.wait_for_transaction_receipt(sentTx)
             else:
                 print(e)
-                raise e
+                raise Exception(f"Unexpected error with code: {e.args[0]['code']}")
         except Exception as e:
-            print(e)
+            new_instructions = self.shrink_expected_output(instructions, 0.999)
+            if self.instructions_are_valid(new_instructions) and count < 2:
+                self.execute_arbitrage(new_instructions, count + 1)
         
