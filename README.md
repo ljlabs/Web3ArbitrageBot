@@ -1,7 +1,7 @@
 # Web3ArbitrageBot
 This is an arbitrage bot that was built for the Velas EVM compatible chain.  
 >*I want to stress the fact that this software is released as a toy example, it does execute profitable trades, however it does fail in some instances, and should therefor be treated as unsafe.*  
->*Although the tool is unsafe please fork it and make any required improvement.* **Any and all improvemtns are welcome :)**
+>*Although the tool is unsafe please fork it and make any required improvement.* **Any and all improvements are welcome :)**
 
 I used some inspiration from the [uniswap-arbitrage-analysis](https://github.com/ccyanxyz/uniswap-arbitrage-analysis) report provided by uniswap to improve this bot however there is still a lot of improvements that can be made. 
 The functioning of thisArbitrage bot is increbibly similar to the paper supplied above, so I would recommend reading it befor making changes to this bot. 
